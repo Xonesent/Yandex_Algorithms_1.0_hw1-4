@@ -1,0 +1,122 @@
+/*
+This solution is incorrect, because it gives an error on the 8th test, but I can’t understand what it is. It seems that the way of thinking should definitely be correct.
+1. Selecting all identifiers corresponding to the description
+2. Deleting words that are marked as exceptions in the condition
+3. Matching the resulting list of words across cases from the condition
+*/
+
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	file, _ := ioutil.ReadFile("input.txt")
+	str := string(file)
+	params := strings.Split(str, "\n")
+
+	var text string
+	a := make(map[string]int)
+	var maxcount int
+	var answord string
+	var answordlist []string
+
+	ntt := strings.Fields(params[0])
+	n, _ := strconv.Atoi(ntt[0])
+	lowup := ntt[1]
+	nums := ntt[2]
+
+  // 1
+  
+	for _, val := range params[n+1:] {
+		i := []byte(val)
+		for idx := 0; idx < len(i); idx++ {
+			if (i[idx] >= 48 && i[idx] <= 57) || (i[idx] == 95) || (i[idx] >= 65 && i[idx] <= 90) || (i[idx] >= 97 && i[idx] <= 122) || (i[idx] == 32) {
+				text += fmt.Sprint(string(i[idx]))
+			}
+			if !((i[idx] >= 48 && i[idx] <= 57) || (i[idx] == 95) || (i[idx] >= 65 && i[idx] <= 90) || (i[idx] >= 97 && i[idx] <= 122) || (i[idx] == 32)) {
+				text += fmt.Sprint(string(byte(32)))
+			}
+		}
+		text += fmt.Sprint(string(byte(32)))
+	}
+	wordlist := strings.Fields(text)
+
+  // 2
+
+	for i := 0; i < len(wordlist); i++ {
+		found := false
+		for idx := 1; idx <= n; idx++ {
+			if wordlist[i] == params[idx] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			answordlist = append(answordlist, wordlist[i])
+		}
+	}
+
+  // 3
+
+	for _, val := range answordlist {
+		if lowup == "yes" && nums == "yes" {
+			_, inMap := a[val]
+			if !inMap {
+				a[val] = 0
+			}
+			a[val]++
+			if a[val] > maxcount {
+				maxcount = a[val]
+				answord = val
+			}
+		}
+		if lowup == "no" && nums == "yes" {
+			val = strings.ToLower(val)
+			_, inMap := a[val]
+			if !inMap {
+				a[val] = 0
+			}
+			a[val]++
+			if a[val] > maxcount {
+				maxcount = a[val]
+				answord = val
+			}
+		}
+		if lowup == "yes" && nums == "no" {
+			i := []byte(val)
+			if !(i[0] >= 48 && i[0] <= 57) {
+				_, inMap := a[val]
+				if !inMap {
+					a[val] = 0
+				}
+				a[val]++
+				if a[val] > maxcount {
+					maxcount = a[val]
+					answord = val
+				}
+			}
+		}
+		if lowup == "no" && nums == "no" {
+			val = strings.ToLower(val)
+			i := []byte(val)
+			if !(i[0] >= 48 && i[0] <= 57) {
+				_, inMap := a[val]
+				if !inMap {
+					a[val] = 0
+				}
+				a[val]++
+				if a[val] > maxcount {
+					maxcount = a[val]
+					answord = val
+				}
+			}
+		}
+	}
+
+	fmt.Println(answord)
+}
