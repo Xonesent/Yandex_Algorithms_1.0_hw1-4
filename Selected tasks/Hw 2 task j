@@ -1,0 +1,115 @@
+/*
+The solution gives a run-time error on the 7th test, and it is very difficult to guess where the error may be, 
+because this solution is very different from the final one proposed
+*/
+
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"strconv"
+	"strings"
+)
+
+var more []float64
+var less []float64
+
+func main() {
+	file, _ := ioutil.ReadFile("input.txt")
+	str := string(file)
+	params := strings.Split(str, "\n")
+
+	numbers := []float64{}
+	bebra := []string{}
+
+	n, _ := strconv.Atoi(params[0])
+	nubmer1, _ := strconv.ParseFloat(params[1], 64)
+	numbers = append(numbers, nubmer1)
+
+	for i := 2; i <= n; i++ {
+		noteData := strings.Fields(params[i])
+		numberi, _ := strconv.ParseFloat(noteData[0], 64)
+		znak := noteData[1]
+		numbers = append(numbers, numberi)
+		bebra = append(bebra, znak)
+	}
+
+	for i := 0; i < n-1; i++ {
+		Module(numbers[i], numbers[i+1], bebra[i])
+	}
+
+	var min float64 = 4000.0
+	var max float64 = 30.0
+
+	for i := 0; i < len(less); i++ {
+		if less[i] < min {
+			min = less[i]
+		}
+	}
+
+	for i := 0; i < len(more); i++ {
+		if more[i] > max {
+			max = more[i]
+		}
+	}
+	fmt.Printf("%.1f %.1f ", max, min)
+}
+
+func Module(a float64, b float64, z string) ([]float64, []float64) {
+	if z == "further" {
+		if b-a > 0 {
+			less = append(less, Min(a, b))
+		}
+		if (b+a)/2 > b && (b+a)/2 <= a {
+			more = append(more, Max((b+a)/2, b))
+			less = append(less, a)
+		}
+		if (b+a)/2 < b && (b+a)/2 >= a {
+			less = append(less, Min((b+a)/2, b))
+			more = append(more, a)
+		}
+		if -b+a > 0 {
+			more = append(more, Max(a, b))
+		}
+	}
+	if z == "closer" {
+		if b-a < 0 {
+			less = append(less, Min(a, b))
+		}
+		if (b+a)/2 > b && (b+a)/2 <= a {
+			more = append(more, b)
+			less = append(less, Min((b+a)/2, a))
+		}
+		if (b+a)/2 < b && (b+a)/2 >= a {
+			less = append(less, b)
+			more = append(more, Max((b+a)/2, a))
+		}
+		if -b+a < 0 {
+			more = append(more, Max(a, b))
+		}
+	}
+	for i := 0; i < len(less); i++ {
+		for idx := 0; idx < len(more); idx++ {
+			if less[i] == more[idx] {
+				less = append(less[:i], less[i+1:]...)
+				more = append(more[:idx], more[idx+1:]...)
+			}
+		}
+	}
+	return less, more
+}
+
+func Min(a float64, b float64) float64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max(a float64, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}
